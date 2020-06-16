@@ -16,8 +16,9 @@ AWS cli. e.g.
 
 ## Running
 
-'pipenv run python shotty/shotty.py <command>
+'pipenv run python shotty/shotty.py <command> <subcommand>
 <--project=PROJECT>''
 
-*command* is list, start, or stop
+*command* is instances, volumes, or snapshots
+*subcommand* depends on command, generally is list, stop, and start
 *project* is optional
