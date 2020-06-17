@@ -86,54 +86,69 @@ def instances():
     """Commands for instances"""
 
 @instances.command('reboot', help="Reboots instances")
-@click.option('--project', default=None,
-                help='Only instances for project(tag Project:<name>)')
-def reboot(project):#Note that reboot and restart are not the same, hence you cannot reboot a stopped instance.
-                    #Made this on my own
+@click.option('--project', default=False,
+                help='Only instances for project(tag Project:<name>')
 
-    instances = filter_instances(project)
-    for i in instances:
-        if i.state['Name'] == "running":
-            print("Rebooting the following instance: " + i.id)
-            i.reboot()
-        else:
-            print("The instance " + i.id + " is currently stopped. Please make sure the instance is running before attempting to reboot.")
-    return
+#--force must be represented in the function def as force argument.
+#is_flag=True specifies the argument as always true so if --force is called, the code will read it as true.
+#Thus the code will inititate.
+#--project, default=False so basically when the command for reboot is initiated, project is set to false by default.
+#So the if project or force: will return False and move to the else block and return an error statement. 
+@click.option('--force', is_flag=True,
+                help="Forces command to initiate without specifying project labels.")
+def reboot(project, force):#Note that reboot and restart are not the same, hence you cannot reboot a stopped instance.
+                    #Made this on my own.
+    if project or force:
+        instances = filter_instances(project)
+        for i in instances:
+            if i.state['Name'] == "running":
+                print("Rebooting the following instance: " + i.id)
+                i.reboot()
+            else:
+                print("The instance " + i.id + " is currently stopped. Please make sure the instance is running before attempting to reboot.")
+    else:
+        print("Project must be specified. --force to continue without project labels.")
 
 @instances.command('snapshot',
 help="Create snapshots of all volumes")
 @click.option('--project', default=None,
               help="Only instances for project(tag Project:<name>)")
-def create_snapshots(project):
+@click.option('--force', is_flag=True,
+                help="Forces command to initiate without specifying project labels.")
+def create_snapshots(project, force):
     "Create snapshots for EC2 instances"
-    instances = filter_instances(project)
 
-    for i in instances:
-        print("Stopping... {0}".format(i.id))
-        i.stop()
-        i.wait_until_stopped()
-        for v in i.volumes.all():
-            if has_pending_snapshot(v):
-                print("Skipping {0}, snapshot already in progress".format(v.id))
-                continue
-            print("Creating snapshots of {0}".format(v.id))
-            v.create_snapshot(Description="Created by our Snapshotalyzer30000")
-        print("Starting... {0}".format(i.id))
-        i.start()
-        i.wait_until_running()
+    if project or force:
+        instances = filter_instances(project)
 
-        print("Job's done!")
-    return
+        for i in instances:
+            print("Stopping... {0}".format(i.id))
+            i.stop()
+            i.wait_until_stopped()
+            for v in i.volumes.all():
+                if has_pending_snapshot(v):
+                    print("Skipping {0}, snapshot already in progress".format(v.id))
+                    continue
+                print("Creating snapshots of {0}".format(v.id))
+                v.create_snapshot(Description="Created by our Snapshotalyzer30000")
+            print("Starting... {0}".format(i.id))
+            i.start()
+            i.wait_until_running()
+
+            print("Job's done!")
+    else:
+        print("Project not specified, --force to continue without project labels.")
 
 
 
 
 @instances.command('list')
+#Basic Value Options on click documentation
 @click.option('--project', default=None,
               help="Only instances for project(tag Project:<name>)")
-
 def list_instances(project):
     "List EC2 instances"
+
     instances = filter_instances(project)
     for i in instances:
         tags = {t['Key']: t['Value'] for t in i.tags or []}
@@ -147,40 +162,51 @@ def list_instances(project):
         )))
     return
 
+
 @instances.command('stop')
 @click.option('--project', default=None,
                 help='Only instances for project')
-def stop_instances(project):
+@click.option('--force', is_flag=True,
+                help="Forces command to initiate without specifying project labels.")
+def stop_instances(project, force):
     'Stop EC2 instances'
-    instances = filter_instances(project)
 
-    for i in instances:
-        print("Stopping {0}... ".format(i.id))
-        try:
-            i.stop()
-        except botocore.exceptions.ClientError as e:
-            print(" Could not stop {0}. ".format(i.id) + str(e))
-            continue
+    if project or force:
+        instances = filter_instances(project)
 
-    return
+        for i in instances:
+            print("Stopping {0}... ".format(i.id))
+            try:
+                i.stop()
+            except botocore.exceptions.ClientError as e:
+                print(" Could not stop {0}. ".format(i.id) + str(e))
+                continue
+    else:
+        print("Project not specified. --force to continue without project labels.")
+
 
 
 @instances.command('start')
 @click.option('--project', default=None,
                 help='Only instances for project')
-def start_instances(project):
+@click.option('--force', is_flag=True,
+                help="Forces command to initiate without specifying project labels.")
+def start_instances(project, force):
     'Start EC2 instances'
-    instances = filter_instances(project)
 
-    for i in instances:
-        print("Starting {0}... ".format(i.id))
-        try:
-            i.start()
-        except botocore.exceptions.ClientError as e:
-            print(" Could not start {0}. ".format(i.id) + str(e))
-            continue
+    if project or force:
+        instances = filter_instances(project)
 
-    return
+        for i in instances:
+            print("Starting {0}... ".format(i.id))
+            try:
+                i.start()
+            except botocore.exceptions.ClientError as e:
+                print(" Could not start {0}. ".format(i.id) + str(e))
+                continue
+    else:
+        print("Project not specified. --force to continue without project labels.")
+
 
 
 if __name__ == '__main__':

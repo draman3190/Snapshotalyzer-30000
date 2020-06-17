@@ -20,5 +20,5 @@ AWS cli. e.g.
 <--project=PROJECT>''
 
 *command* is instances, volumes, or snapshots
-*subcommand* depends on command, generally is list, stop, and start
-*project* is optional
+*subcommand* depends on command, generally is list, stop, and start or reboot.
+*project* still optional but --force option added in hopes to be more organized and allow for more project label usage.
