@@ -85,6 +85,21 @@ def list_volumes(project):
 def instances():
     """Commands for instances"""
 
+@instances.command('reboot', help="Reboots instances")
+@click.option('--project', default=None,
+                help='Only instances for project(tag Project:<name>)')
+def reboot(project):#Note that reboot and restart are not the same, hence you cannot reboot a stopped instance.
+                    #Made this on my own
+
+    instances = filter_instances(project)
+    for i in instances:
+        if i.state['Name'] == "running":
+            print("Rebooting the following instance: " + i.id)
+            i.reboot()
+        else:
+            print("The instance " + i.id + " is currently stopped. Please make sure the instance is running before attempting to reboot.")
+    return
+
 @instances.command('snapshot',
 help="Create snapshots of all volumes")
 @click.option('--project', default=None,
