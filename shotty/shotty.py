@@ -19,8 +19,31 @@ def filter_instances(project):
 
 @click.group() #pipenv run python shotty/shotty.py will give the standard
 #display screen under this entire group
+#@click.option("--profile", default=None,
+                #help='Choose your profile')
+
 def cli():
     """Shotty manages snapshots"""
+
+
+@cli.group('profiles')
+def profiles():
+    """Commands for profiles"""
+
+@profiles.command('change_profile')
+@click.option('--profile', default=None,
+                help='Choose your profile')
+
+def change_profile(profile):
+    try:
+        if profile:
+            session = boto3.Session(profile_name = str(profile))
+            ec2 = session.resource('ec2')
+    except botocore.exceptions.ProfileNotFound:
+        print("The profile name entered is not registered. Please add it to the AWS configuration folder \nalong with the proper credentials and try again.")
+
+
+
 
 @cli.group('snapshots')
 def snapshots():
