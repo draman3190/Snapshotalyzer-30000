@@ -93,7 +93,7 @@ def instances():
 #is_flag=True specifies the argument as always true so if --force is called, the code will read it as true.
 #Thus the code will inititate.
 #--project, default=False so basically when the command for reboot is initiated, project is set to false by default.
-#So the if project or force: will return False and move to the else block and return an error statement. 
+#So the if project or force: will return False and move to the else block and return an error statement.
 @click.option('--force', is_flag=True,
                 help="Forces command to initiate without specifying project labels.")
 def reboot(project, force):#Note that reboot and restart are not the same, hence you cannot reboot a stopped instance.
